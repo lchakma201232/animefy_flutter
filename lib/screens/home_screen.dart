@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(Icons.image),
               onPressed: () {
-                Navigator.pushNamed(context, "ImageGallery");
+                Navigator.pushNamed(context, "/ImageGallery");
               },
             ),
             IconButton(

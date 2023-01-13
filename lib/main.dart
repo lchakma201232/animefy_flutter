@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/middlewares/camera_loader.dart';
 import 'package:flutter_project/screens/home_screen.dart';
+import 'package:flutter_project/screens/image_gallery.dart';
 import 'package:flutter_project/screens/signup_screen.dart';
 import 'package:flutter_project/screens/login_screen.dart';
 import 'package:flutter_project/screens/welcome_screen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => LoginScreen(),
           '/welcome': (context) => WelcomeScreen(),
           '/signup': (context) => SignUpScreen(),
+          '/ImageGallery': (context) => Gallery(),
         });
   }
 }

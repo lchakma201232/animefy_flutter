@@ -46,6 +46,7 @@ dependencies:
   http: ^0.13.5
   image_picker: ^0.8.6
   exif: ^3.1.2
+  photo_view: ^0.14.0
 
 dev_dependencies:
   flutter_test:
