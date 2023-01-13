@@ -31,7 +31,7 @@ flutter run
 ```
 ## Built With
 - [Flutter](https://flutter.dev/) - The mobile framework used
-- [Anime.dart](https://github.com/matanlurey/anime.dart) - Flutter animation library
+- [AnimeGANv2](https://huggingface.co/spaces/akhaliq/AnimeGANv2) - AnimeGANv2 backend for converting images
 - [image_picker](https://pub.dev/packages/image_picker) - A Flutter plugin for picking images and videos from the image library and camera.
 
 ## Contributing
