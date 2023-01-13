@@ -9,10 +9,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'dart:io';
-
+import 'package:exif/exif.dart';
 import '../helpers/auth_functions.dart';
 
 class HomeScreen extends StatefulWidget {
+  final List<CameraDescription> cameras;
+  const HomeScreen({Key? key, required this.cameras}) : super(key: key);
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -22,24 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
   late String? _imagePath = null;
   late User _user;
   bool _imageLoading = false;
-
+  bool _isCameraFront = false;
   @override
   void initState() {
     super.initState();
-
-    _checkPermission();
     _getAuth();
-  }
-
-  _checkPermission() async {
-    final cameras = await availableCameras();
-    _controller = CameraController(cameras[0], ResolutionPreset.medium);
-    _controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    });
+    _controller = CameraController(widget.cameras[0], ResolutionPreset.medium,
+        enableAudio: false);
   }
 
   _getAuth() async {
@@ -53,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _toggleCameraType() {
-    if (_controller.description.lensDirection == CameraLensDirection.back) {
+    if (_isCameraFront) {
       _controller = CameraController(
         _controller.description,
         ResolutionPreset.medium,
@@ -61,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       _controller = CameraController(
-        _controller.description,
+        widget.cameras[1],
         ResolutionPreset.medium,
         enableAudio: false,
       );
@@ -70,22 +61,22 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) {
         return;
       }
-      setState(() {});
+      setState(() {
+        _isCameraFront = !_isCameraFront;
+      });
     });
   }
 
   _capture() async {
     XFile path = await _controller.takePicture();
-    print(path.path);
+    // print(path.path);
     setState(() {
       _imagePath = path.path;
       _imageLoading = true;
     });
-
+    print('mehere');
     try {
       final credit = await checkCredit(_user);
-      // print(credit);
-      // print('Here');
       if (credit < 1) {
         _showCreditAlert();
         setState(() {
@@ -93,9 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         return;
       }
-
-      final image =
-          await FlutterNativeImage.compressImage(_imagePath!, quality: 100);
+      var image = File(path.path);
+      var exifdata = await readExifFromBytes(await image.readAsBytes());
+      // print(exifdata['Image Orientation']);
+      image = await FlutterNativeImage.compressImage(_imagePath!, quality: 100);
       final base64 = base64Encode(image.readAsBytesSync());
       var url = "https://akhaliq-animeganv2.hf.space/api/predict";
       String uri = await animefy(base64, url, "version 2", _user);
@@ -131,68 +123,170 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _checkCredit(User user) async {
-    // Do something to check the user's credit, such as making a call to a server
-    // For example:
-    // var credit = await someService.checkCredit(user.uid);
-    // return credit;
+  _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false);
   }
+
+  _checkCredit(User user) async {}
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null || !_controller.value.isInitialized) {
-      return Container();
+    // // print('Building Home Screen');
+    if (_controller == null) {
+      return Container(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Animefy"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.image),
-            onPressed: () {
-              Navigator.pushNamed(context, "ImageGallery");
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-                child: Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: Center(
-                        child: _imageLoading
-                            ? Text("Loading...")
-                            : _imagePath == null
-                                ? AspectRatio(
-                                    aspectRatio: _controller.value.aspectRatio,
-                                    child: CameraPreview(_controller),
-                                  )
-                                : Image.file(File(_imagePath!),
-                                    fit: BoxFit.contain)))),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _imageLoading
-                ? Container()
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.camera_alt),
-                        onPressed: _capture,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.flip_camera_android),
-                        onPressed: _toggleCameraType,
-                      ),
-                    ],
+        appBar: AppBar(
+          title: Text("Animefy"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.image),
+              onPressed: () {
+                Navigator.pushNamed(context, "ImageGallery");
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () {
+                _signOut();
+                Navigator.pushReplacementNamed(context, "/login");
+              },
+            ),
+          ],
+        ),
+        body: FutureBuilder<void>(
+          future: _controller.initialize(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                        color: Colors.black,
+                        child: Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: Center(
+                                child: _imageLoading
+                                    ? Container(
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                    : _imagePath == null
+                                        ? CameraPreview(_controller,
+                                            child: Stack(
+                                              children: <Widget>[
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomCenter,
+                                                  child: Container(
+                                                    height: 100,
+                                                    width: double.infinity,
+                                                    color: Colors.black
+                                                        .withOpacity(0.5),
+                                                  ),
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomCenter,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: <Widget>[
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons
+                                                                  .flip_camera_android,
+                                                              color:
+                                                                  Colors.white),
+                                                          onPressed:
+                                                              _toggleCameraType,
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.camera_alt,
+                                                              color:
+                                                                  Colors.white),
+                                                          onPressed: _capture,
+                                                        ),
+                                                        IconButton(
+                                                            onPressed: () {
+                                                              setState(() {
+                                                                _imagePath =
+                                                                    null;
+                                                              });
+                                                            },
+                                                            icon: Icon(
+                                                                Icons.refresh,
+                                                                color: Colors
+                                                                    .white))
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ))
+                                        : Image.file(
+                                            File(_imagePath!),
+                                            fit: BoxFit.contain,
+                                          )))),
                   ),
-          ),
-        ],
-      ),
-    );
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: _imagePath == null
+                        ? Container()
+                        : Container(
+                            color: Colors.black,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                IconButton(
+                                  icon: const Icon(Icons.flip_camera_android,
+                                      color: Colors.white),
+                                  onPressed: _toggleCameraType,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.camera_alt,
+                                      color: Colors.white),
+                                  onPressed: _capture,
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _imagePath = null;
+                                      });
+                                    },
+                                    icon: Icon(Icons.refresh,
+                                        color: Colors.white))
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            } else {
+              return Container(
+                // decoration: BoxDecoration(
+                //   color: Colors.black,
+                // ),
+                color: Colors.black,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+          },
+        ));
   }
 }
