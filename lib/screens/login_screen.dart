@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
         print('User is currently signed out!');
       } else {
         print('User is signed in!');
-        Navigator.pushReplacementNamed(context, '/homeDrawer');
+        Navigator.pushReplacementNamed(context, '/home');
       }
     });
   }

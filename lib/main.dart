@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/screens/home_screen.dart';
+import 'package:flutter_project/screens/signup_screen.dart';
 import 'package:flutter_project/screens/login_screen.dart';
 import 'package:flutter_project/screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,11 +33,11 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: HomeScreen(),
+        home: SignUpScreen(),
         routes: {
           '/login': (context) => LoginScreen(),
           '/welcome': (context) => WelcomeScreen(),
-          '/home': (context) => HomeScreen(),
+          '/signUp': (context) => SignUpScreen(),
         });
   }
 }
