@@ -7,7 +7,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  String email = '', password = '', confirmPassword = '';
+  String email = '', password = '', firstName = '', lastName = '';
   bool emptyEmail = false;
   bool emptyPassword = false;
   bool emptyConfirmPassword = false;
@@ -28,20 +28,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         emptyPassword = true;
       });
     }
-    if (confirmPassword.isEmpty) {
-      setState(() {
-        emptyConfirmPassword = true;
-      });
-    }
-    if (password != confirmPassword) {
-      setState(() {
-        passwordMismatch = true;
-      });
-    }
-    if (email.isNotEmpty &&
-        password.isNotEmpty &&
-        confirmPassword.isNotEmpty &&
-        password == confirmPassword) {
+    if (email.isNotEmpty && password.isNotEmpty) {
       setState(() {
         emptyEmail = false;
         emptyPassword = false;
@@ -52,6 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         FirebaseAuth auth = FirebaseAuth.instance;
         UserCredential user = await auth.createUserWithEmailAndPassword(
             email: email, password: password);
+
         if (user != null) {
           Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
         }
@@ -79,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             children: <Widget>[
               const SizedBox(
-                height: 150,
+                height: 100,
               ),
               Image.asset(
                 'assets/images/small_logo.png',
@@ -105,6 +93,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontSize: 20,
                           fontFamily: 'Rockybilly',
                           color: Color.fromARGB(255, 46, 125, 111)),
+                    ),
+                    TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          firstName = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                          labelText: 'First Name',
+                          errorText:
+                              emptyEmail ? 'First name can\'t be empty' : null,
+                          labelStyle: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          )),
+                    ),
+                    TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          lastName = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                          labelText: 'Last Name',
+                          errorText:
+                              emptyEmail ? 'Last name can\'t be empty' : null,
+                          labelStyle: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          )),
                     ),
                     TextField(
                       onChanged: (value) {
@@ -139,29 +159,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             color: Colors.grey,
                           )),
                     ),
-                    TextField(
-                      obscureText: true,
-                      onChanged: (value) {
-                        setState(() {
-                          confirmPassword = value;
-                        });
-                      },
-                      decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          errorText: emptyConfirmPassword
-                              ? 'Confirm Password can\'t be empty'
-                              : passwordMismatch
-                                  ? 'Passwords do not match'
-                                  : null,
-                          labelStyle: const TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 40,
-                    ),
+                    const SizedBox(height: 20),
                     isLoading
                         ? CircularProgressIndicator()
                         : Container(
@@ -211,9 +209,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       decoration: TextDecoration.underline))),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
+              ),
+              SizedBox(
+                height: 20,
               ),
             ],
           ),
