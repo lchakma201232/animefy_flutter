@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/screens/home_screen.dart';
 import 'package:flutter_project/screens/signup_screen.dart';
 import 'package:flutter_project/screens/login_screen.dart';
 import 'package:flutter_project/screens/welcome_screen.dart';
@@ -33,8 +34,9 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: SignUpScreen(),
+        home: WelcomeScreen(),
         routes: {
+          '/home': (context) => HomeScreen(),
           '/login': (context) => LoginScreen(),
           '/welcome': (context) => WelcomeScreen(),
           '/signUp': (context) => SignUpScreen(),

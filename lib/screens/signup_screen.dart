@@ -53,7 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         UserCredential user = await auth.createUserWithEmailAndPassword(
             email: email, password: password);
         if (user != null) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
         }
       } catch (e) {
         setState(() {

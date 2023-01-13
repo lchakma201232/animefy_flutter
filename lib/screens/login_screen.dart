@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
         print('User is currently signed out!');
       } else {
         print('User is signed in!');
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     });
   }
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // ignore: unnecessary_null_comparison
         if (user != null) {
           // ignore: use_build_context_synchronously
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
         }
       } catch (e) {
         setState(() {
