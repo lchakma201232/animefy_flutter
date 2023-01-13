@@ -31,20 +31,20 @@ Future<String> animefy(
   return uri;
 }
 
-Future<List<Map<String, dynamic>>> loadImages(User user) async {
+Future<List<String>> loadImages(User user) async {
   final images = await getImages(user);
-  final uris = <Map<String, dynamic>>[];
+  List<String> uris = [];
   for (final element in images) {
     final base64 = element['base64'];
-    final file = File(
-        '${(await getTemporaryDirectory()).path}/${element['timestamp']}.jpg')
-      ..writeAsString(base64,
-          mode: FileMode.write,
-          flush: true,
-          encoding: Encoding.getByName('base64')!);
-    uris.add({'id': element['timestamp'], 'uri': file.uri});
+    Uint8List bytes = base64Decode(base64);
+    final uri =
+        '${(await getTemporaryDirectory()).path}/${element['timestamp']}.jpg';
+    await File(uri).writeAsBytes(bytes, mode: FileMode.write);
+
+    uris.add(uri);
   }
-  uris.sort((a, b) => b['id'].compareTo(a['id']));
+  //reverse the list so that the latest image is at the top
+  uris = uris.reversed.toList();
   return uris;
 }
 
