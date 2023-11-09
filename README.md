@@ -1,8 +1,7 @@
 ﻿# Animefy
 Animefy is a Flutter app that allows you to convert your images into anime-style paintings. With a user-friendly interface, this app makes it easy to add a touch of anime to your photos.
-<img src="https://raw.githubusercontent.com/lchakma201232/animefy_flutter/master/assets/images/Screenshot_20231108-195643.jpg" alt="drawing" width="200"/>
-![Welcome Screen](https://raw.githubusercontent.com/lchakma201232/animefy_flutter/master/assets/images/Screenshot_20231108-195643.jpg)
-![Login Screen](https://raw.githubusercontent.com/lchakma201232/animefy_flutter/master/assets/images/Screenshot_20231108-195647.jpg)
+<img src="https://raw.githubusercontent.com/lchakma201232/animefy_flutter/master/assets/images/Screenshot_20231108-195643.jpg" alt="Welcome Screen" width="700"/>
+<img src="https://raw.githubusercontent.com/lchakma201232/animefy_flutter/master/assets/images/Screenshot_20231108-195647.jpg" alt="Login Screen" width="700"/>
 ## Features
 - Convert your images into anime-style paintings with just a few taps
 - Preview the conversion before saving
